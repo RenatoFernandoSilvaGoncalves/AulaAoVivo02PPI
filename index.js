@@ -7,6 +7,10 @@ var listaUsuarios = [];
 
 const server = express();
 
+//Preparar o servidor a fim de processar dados vindos no corpo da requisicao
+server.use(express.urlencoded({extended: true}));
+
+
 server.get("/", (requisicao, resposta) => {
     //disponibilizar o menu para o usuário
     resposta.send(`
@@ -154,8 +158,64 @@ server.get("/cadastroUsuario", (requisicao,resposta) => {
 })
 
 server.post('/adicionarUsuario', (requisicao, resposta) => {
-    console.log("Usuario cadastrado com sucesso!");
-    listaUsuarios.push();
+    const nome = requisicao.body.nome;
+    const sobrenome = requisicao.body.sobrenome;
+    const usuario = requisicao.body.usuario;
+    const cidade = requisicao.body.cidade;
+    const uf = requisicao.body.uf;
+    const cep = requisicao.body.cep;
+
+    listaUsuarios.push({nome, sobrenome, usuario, cidade, uf, cep});
+    resposta.redirect("/listarUsuarios");
+
+    });
+
+server.get("/listarUsuarios", (requisicao, resposta) => {
+    let conteudo = `
+        <DOCTYPE html>
+        <html>
+            <head>
+                <meta charset="UTF-8">
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+                <title>Lista de usuários no Sistema</title>
+            </head>
+            <body>
+                <div class="container">
+                    <h1 class="text-center border m-3 p-3 bg-light">Lista de Usuários</h1>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Sobrenome</th>
+                                <th>Usuario</th>
+                                <th>Cidade</th>
+                                <th>UF</th>
+                                <th>Cep</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+    for (let i = 0; i < listaUsuarios.length; i++) {
+        conteudo += `
+            <tr>
+                <td>${listaUsuarios[i].nome}</td>
+                <td>${listaUsuarios[i].sobrenome}</td>
+                <td>${listaUsuarios[i].usuario}</td>
+                <td>${listaUsuarios[i].cidade}</td>
+                <td>${listaUsuarios[i].uf}</td>
+                <td>${listaUsuarios[i].cep}</td>
+            </tr>
+        `;
+    }
+    conteudo+=`
+                        </tbody>
+                    </table>
+                    <a class="btn btn-secondary" href="/cadastroUsuario">Voltar</a>
+                </div>
+            </body>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+        </html>
+    `
+    resposta.send(conteudo);
 });
 
 server.listen(porta, host, () => {
